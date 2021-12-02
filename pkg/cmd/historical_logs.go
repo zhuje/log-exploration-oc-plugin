@@ -44,7 +44,7 @@ var (
 )
 
 type ResponseLogs struct {
-	Logs []string
+	Logs  []string
 	Error string
 }
 
@@ -121,13 +121,11 @@ func (o *LogParameters) Execute(kubernetesOptions *client.KubernetesOptions, str
 		go FetchLogs(baseUrl, o, pod, podLogsCh)
 	}
 
-	// JZ -- takes channel and puts it into a slice
 	for index := 0; index < len(podList); index++ {
 		podLogs := <-podLogsCh
 		logList = append(logList, podLogs...)
 	}
 
-	// JZ -- sort logs by timestamp
 	sort.Slice(logList, func(index1, index2 int) bool {
 		return logList[index1].Source.Timestamp.String() > logList[index2].Source.Timestamp.String()
 	})

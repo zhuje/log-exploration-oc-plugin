@@ -169,7 +169,7 @@ func TestExecute(t *testing.T) {
 			httpmock.RegisterResponder("GET", "http://log-exploration-api-route-openshift-logging.apps.com/logs/filter",
 				func(req *http.Request) (*http.Response, error) {
 					resp, err := httpmock.NewJsonResponse(400, map[string]interface{}{"Error": "Not Found Error, please check the input parameters", "Logs": nil,
-					} )
+					})
 					if err != nil {
 						return httpmock.NewStringResponse(500, ""), nil
 					}
@@ -232,8 +232,6 @@ func TestPrintLogs(t *testing.T) {
 			-2,
 			fmt.Errorf("incorrect \"limit\" value entered, an integer value between 0 and 1000 is required"),
 		},
-
-
 	}
 
 	for _, tt := range tests {
@@ -260,4 +258,3 @@ func TestPrintLogs(t *testing.T) {
 		}
 	}
 }
-
