@@ -45,6 +45,7 @@ var (
 
 type ResponseLogs struct {
 	Logs []string
+	Error string
 }
 
 type LogParameters struct {
@@ -120,11 +121,13 @@ func (o *LogParameters) Execute(kubernetesOptions *client.KubernetesOptions, str
 		go FetchLogs(baseUrl, o, pod, podLogsCh)
 	}
 
+	// JZ -- takes channel and puts it into a slice
 	for index := 0; index < len(podList); index++ {
 		podLogs := <-podLogsCh
 		logList = append(logList, podLogs...)
 	}
 
+	// JZ -- sort logs by timestamp
 	sort.Slice(logList, func(index1, index2 int) bool {
 		return logList[index1].Source.Timestamp.String() > logList[index2].Source.Timestamp.String()
 	})
@@ -181,8 +184,15 @@ func FetchLogs(baseUrl string, logParameters *LogParameters, podname string, pod
 
 	jsonResponse := &ResponseLogs{}
 	err = json.Unmarshal(responseBody, &jsonResponse)
+
 	if err != nil {
 		fmt.Printf("unable to fetch logs of pod %s - an error occurred while unmarshalling JSON response: %v\n", podname, err)
+		podLogsCh <- nil
+		return
+	}
+
+	if jsonResponse.Error != "" {
+		fmt.Printf("unable to fetch logs of pod %s - a server-side error occured: %v\n", podname, jsonResponse.Error)
 		podLogsCh <- nil
 		return
 	}
